@@ -79,19 +79,13 @@ async function login(req, res) {
 
     const user = await db.select().from('users').where({ username }).first();
 
-    console.log(user);
-
     if (user) {
 
       const correct = await bcrypt.compare(password, user.password);
 
-      //console.log(correct);
-
       if (correct) {
 
         const token = await generateToken(user);
-
-        //console.log(token);
 
         res.status(200).json({user, token});
         return;
