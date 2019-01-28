@@ -22,9 +22,9 @@ export default class LoginPage extends React.Component {
 
   signUp = e => {
 
-    const { username, password } = this.state;
+    e.preventDefault();
 
-    console.log(process.env.REACT_APP_SERVER_HOST);
+    const { username, password } = this.state;
 
     axios.post(`${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}/api/register`, { username, password })
       .then(res => {
@@ -37,7 +37,16 @@ export default class LoginPage extends React.Component {
 
   signIn = e => {
 
+    e.preventDefault();
 
+    const { username, password } = this.state;
+
+    axios.post(`${process.env.REACT_APP_SERVER_HOST}:${process.env.REACT_APP_SERVER_PORT}/api/login`, { username, password })
+      .then(res => {
+        localStorage.token = res.data.token;
+        this.props.history.push('/jokes');
+      })
+      .catch(err => this.setState({err: err.response.data.message}));
 
   }
 
@@ -45,7 +54,7 @@ export default class LoginPage extends React.Component {
 
     return (
 
-      <form className='login-form' onSubmit={e => e.preventDefault()}>
+      <form className='login-form' onSubmit={this.signIn}>
 
         <input
           type='text'

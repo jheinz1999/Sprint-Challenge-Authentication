@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route, withRouter } from 'react-router-dom';
 
 import LoginPage from './components/LoginPage.js';
+import JokesPage from './components/JokesPage.js';
 
 class App extends Component {
   render() {
@@ -23,6 +24,12 @@ class App extends Component {
           exact
           path='/login'
           render={props => <LoginPage {...props} />}
+        />
+
+        <Route
+          exact
+          path='/jokes'
+          render={props => <JokesPage {...props} />}
         />
 
       </div>
