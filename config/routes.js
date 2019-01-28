@@ -1,6 +1,8 @@
 const axios = require('axios');
+const bcrypt = require('bcryptjs');
 
-const { authenticate } = require('../auth/authenticate');
+const { authenticate, generateToken } = require('../auth/authenticate');
+const db = require('../database/dbConfig');
 
 module.exports = server => {
   server.post('/api/register', register);
@@ -8,8 +10,51 @@ module.exports = server => {
   server.get('/api/jokes', authenticate, getJokes);
 };
 
-function register(req, res) {
-  // implement user registration
+async function register(req, res) {
+
+  let { username, password } = req.body;
+
+  if (!username) {
+
+    res.status(400).json({message: 'Please provide a username!'});
+    return;
+
+  }
+
+  if (!password) {
+
+    res.status(400).json({message: 'Please provide a password!'});
+    return;
+
+  }
+
+  try {
+
+    // quick development hash
+    password = await bcrypt.hash(password, 2);
+
+    const [ id ] = await db.insert({ username, password }).into('users');
+
+    const user = await db.select().from('users').where({ id }).first();
+
+    const token = await generateToken(user);
+
+    res.status(201).json({user, token});
+
+  }
+
+  catch (err) {
+
+    const exists = await db.select().from('users').where({ username });
+
+    if (exists.length > 0)
+      res.status(400).json({message: 'That username exists!'});
+
+    else
+      res.status(500).json({message: 'We had a problem handling your request.'});
+
+  }
+
 }
 
 function login(req, res) {
