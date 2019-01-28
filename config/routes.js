@@ -57,8 +57,59 @@ async function register(req, res) {
 
 }
 
-function login(req, res) {
-  // implement user login
+async function login(req, res) {
+
+  const { username, password } = req.body;
+
+  if (!username) {
+
+    res.status(400).json({message: 'Please provide a username!'});
+    return;
+
+  }
+
+  if (!password) {
+
+    res.status(400).json({message: 'Please provide a password!'});
+    return;
+
+  }
+
+  try {
+
+    const user = await db.select().from('users').where({ username }).first();
+
+    console.log(user);
+
+    if (user) {
+
+      const correct = await bcrypt.compare(password, user.password);
+
+      //console.log(correct);
+
+      if (correct) {
+
+        const token = await generateToken(user);
+
+        //console.log(token);
+
+        res.status(200).json({user, token});
+        return;
+
+      }
+
+    }
+
+  }
+
+  catch (err) {
+
+    res.status(500).json({message: 'We had a problem handling your request.'});
+
+  }
+
+  res.status(401).json({message: 'Invalid credentials!'});
+
 }
 
 function getJokes(req, res) {
